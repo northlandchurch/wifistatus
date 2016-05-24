@@ -26,6 +26,7 @@ $coreswitch = pingDomain('10.254.0.1');
 $google = pingDomain('google.com');
 $pco = pingDomain('planningcenteronline.com');
 $slack = pingDomain('northlandchurch.slack.com');
+$northland = pingDomain('northlandchurch.net');
 
 DB::insert('wifidata', array(
   'clientprobe' => $clientprobe,
@@ -33,5 +34,6 @@ DB::insert('wifidata', array(
   'google' => $google,
   'label' => 'Green Room - Team',
   'pco' => $pco,
-  'slack' => $slack
+  'slack' => $slack,
+  'northland' => $northland
 ));
