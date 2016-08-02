@@ -4,11 +4,29 @@ date_default_timezone_set('America/New_York');
 include 'meekrodb.2.3.class.php';
 include 'db-config.php';
 
+if (isset($_GET['probe'])) {
+	switch ($_GET['probe']) {
+		case 'rinkmailroom':
+			$probe = ['Rink Mail Room - Wired','Rink Mail Room - Wireless'];
+			$chartdescription = ['This probe is located in the Rink Mail Room and it is wired directly to the switch.','This probe is located in the Rink Mail Room and it is on the Hidden Network.'];
+			break;
+		default:
+			$probe = ['Green Room - Team','Green Room - Northland'];
+			$chartdescription = ['The Team wifi network bandwidth is not restricted.','The Northland wifi bandwidth is restricted during the Sunday AM services.'];
+			break;
+	}
+} else {
+	$probe = ['Green Room - Team','Green Room - Northland'];
+	$chartdescription = ['The Team wifi network bandwidth is not restricted.','The Northland wifi bandwidth is restricted during the Sunday AM services.'];
+
+}
+
 function writedata($probe, $data) {
 
   $intervals = (isset($_GET['intervals'])) ? $_GET['intervals'] : 'raw';
   $fromdt = (isset($_GET['fromdt'])) ? urldecode($_GET['fromdt']) : date('Y-m-d H:i:s', strtotime('-1 hour'));
   $todt = (isset($_GET['todt'])) ? urldecode($_GET['todt']) : date('Y-m-d H:i:s');
+  
 
   switch ($intervals) {
     case 'avg':
@@ -31,7 +49,7 @@ function writedata($probe, $data) {
           'probe' => $probe
         )
       );
-    break;
+	  break;
   }
 
   $i = 1;
@@ -51,7 +69,7 @@ function writedt($probe) {
   $fromdt = urldecode($_GET['fromdt']);
   $todt = urldecode($_GET['todt']);
 
-  if (isset($_GET['fromdt'])) {
+  if(isset($_GET['fromdt'])){
     $datetimes = DB::Query("select datetime from wifidata where label = %s_probe and datetime between %t_fromdt and %t_todt order by datetime",
       array(
         'fromdt' => $fromdt,
@@ -75,8 +93,6 @@ function writedt($probe) {
   }
 }
 ?>
-
-
 <!DOCTYPE html>
 <html>
   <head>
@@ -147,7 +163,8 @@ function writedt($probe) {
             <div class="form-group">
               <select class="form-control" name="probe">
                 <option value="greenroom">Green Room</option>
-              </select>
+                <option value="rinkmailroom">Rink Mail Room</option>
+				</select>
             </div>
             <button type="submit" class="btn btn-default">Submit</button>
           </p>
@@ -168,15 +185,15 @@ function writedt($probe) {
 
       $('#container1').highcharts({
           title: {
-            text: 'Green Room "Team" Network Response Times',
+            text: '<?php echo $probe[0] ?> Network Response Times',
             x: -20 //center
           },
           subtitle: {
-            text: 'The Team wifi network bandwidth is not restricted.',
+            text: '<?php echo $chartdescription[0] ?>',
             x: -20
           },
           xAxis: {
-            categories: [<?php @writedt('Green Room - Team'); ?>]
+            categories: [<?php @writedt($probe[0]); ?>]
           },
           yAxis: {
             title: {
@@ -202,32 +219,32 @@ function writedt($probe) {
           },
           series: [{
             name: 'Northland',
-            data: [<?php writedata('Green Room - Team', 'northland'); ?>]
+            data: [<?php writedata($probe[0], 'northland'); ?>]
           }, {
             name: 'PCO',
-            data: [<?php writedata('Green Room - Team', 'pco'); ?>]
+            data: [<?php writedata($probe[0], 'pco'); ?>]
           }, {
             name: 'Slack',
-            data: [<?php writedata('Green Room - Team', 'slack'); ?>]
+            data: [<?php writedata($probe[0], 'slack'); ?>]
           }, {
             name: 'Google',
-            data: [<?php writedata('Green Room - Team', 'google'); ?>]
+            data: [<?php writedata($probe[0], 'google'); ?>]
           }, {
             name: 'Core Switch',
-            data: [<?php writedata('Green Room - Team', 'coreswitch'); ?>]
+            data: [<?php writedata($probe[0], 'coreswitch'); ?>]
           }]
         });
       $('#container2').highcharts({
             title: {
-              text: 'Green Room "Northland" Network Response Times',
+              text: '<?php echo $probe[1] ?> Network Response Times',
               x: -20 //center
             },
             subtitle: {
-              text: 'The Northland wifi bandwidth is restricted during the Sunday AM services.',
+              text: '<?php echo $chartdescription[1] ?>',
               x: -20
             },
             xAxis: {
-              categories: [<?php @writedt('Green Room - Northland'); ?>]
+              categories: [<?php @writedt($probe[1]); ?>]
             },
             yAxis: {
               title: {
@@ -253,19 +270,16 @@ function writedt($probe) {
             },
             series: [{
               name: 'Northland',
-              data: [<?php writedata('Green Room - Northland', 'northland'); ?>]
+              data: [<?php writedata($probe[1], 'northland'); ?>]
             }, {
               name: 'PCO',
-              data: [<?php writedata('Green Room - Northland', 'pco'); ?>]
+              data: [<?php writedata($probe[1], 'pco'); ?>]
             }, {
               name: 'Slack',
-              data: [<?php writedata('Green Room - Northland', 'slack'); ?>]
+              data: [<?php writedata($probe[1], 'slack'); ?>]
             }, {
               name: 'Google',
-              data: [<?php writedata('Green Room - Northland', 'google'); ?>]
-            }, {
-              name: 'Core Switch',
-              data: [<?php writedata('Green Room - Northland', 'coreswitch'); ?>]
+              data: [<?php writedata($probe[1], 'google'); ?>]
             }]
           });
     });
