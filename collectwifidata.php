@@ -2,7 +2,7 @@
 include 'meekrodb.2.3.class.php';
 include 'db-config.php';
 
-// check responsetime for a webbserver
+// check responsetime for a webserver
 function pingDomain($domain){
   $starttime = microtime(true);
   // supress error messages with @
